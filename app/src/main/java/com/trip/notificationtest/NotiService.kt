@@ -74,6 +74,7 @@ class NotiService : Service() {
                     .setContentTitle("title")
                     .setContentText("contents")
                     .setAutoCancel(true)
+                    .setTicker("Ticker!")
                     .setContentIntent(pendingIntent)
         }else{
             builder =
@@ -84,6 +85,7 @@ class NotiService : Service() {
                     .setPriority(Notification.PRIORITY_MAX)
                     .setVibrate( longArrayOf(100, 200, 100, 200))
                     .setAutoCancel(true)
+                    .setTicker("Ticker!")
                     .setContentIntent(pendingIntent)
 
         }
