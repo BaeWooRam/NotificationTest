@@ -9,12 +9,17 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
+import android.util.Log
 import android.widget.RemoteViews
+import androidx.annotation.RequiresApi
+import com.trip.notificationtest.Config.isSound
 
 
 class NotiService : Service() {
     companion object {
-        const val CHANNEL_ID = "snwodeer_service_channel"
+        const val CHANNEL_ID = "service_channel"
+        const val NONE_CHANNEL_ID = "none_service_channel"
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -35,61 +40,96 @@ class NotiService : Service() {
     }
 
     private fun startForegroundService() {
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        val remoteViews = RemoteViews(packageName, R.layout.notification)
-        var builder: Notification.Builder
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= 26) {
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            notificationIntent,
+            PendingIntent.FLAG_CANCEL_CURRENT
+        )
+        val remoteViews = RemoteViews(packageName, R.layout.notification)
 
+        var builder: Notification.Builder =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                createChannel(notificationManager)
 
-            val notificationChannel = NotificationChannel(
-                CHANNEL_ID,
-                "공지",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-
-            notificationChannel.description = "channel description"
-            notificationChannel.enableLights(true)
-            notificationChannel.lightColor = Color.GREEN
-            notificationChannel.enableVibration(true)
-
-            val defaultSoundUri: Uri =
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
-            val att = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build()
-
-            notificationChannel.setSound(defaultSoundUri, att)
-            notificationChannel.vibrationPattern = longArrayOf(100, 200, 100, 200);
-            notificationManager.createNotificationChannel(notificationChannel)
-
-            builder =
-                Notification.Builder(applicationContext, CHANNEL_ID)
+                Notification.Builder(
+                    applicationContext,
+                    if (isSound) CHANNEL_ID else NONE_CHANNEL_ID
+                )
                     .setSmallIcon(R.drawable.ic_launcher_background)
                     .setContentTitle("title")
                     .setContentText("contents")
                     .setAutoCancel(true)
                     .setTicker("Ticker!")
                     .setContentIntent(pendingIntent)
-        }else{
-            builder =
-                Notification.Builder(applicationContext)
-                    .setSmallIcon(R.drawable.ic_launcher_background)
+            } else {
+
+                val builder:Notification.Builder = Notification.Builder(applicationContext)
+
+                builder.setSmallIcon(R.drawable.ic_launcher_background)
                     .setContentTitle("title")
                     .setContentText("contents")
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setVibrate( longArrayOf(100, 200, 100, 200))
+                    .setPriority(Notification.PRIORITY_DEFAULT)
                     .setAutoCancel(true)
                     .setTicker("Ticker!")
                     .setContentIntent(pendingIntent)
 
-        }
+                if (isSound) {
+                    val alarmSound =
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                    builder.setSound(alarmSound)
+                    builder.setVibrate(longArrayOf(100, 200, 100, 200))
+                }
+
+                builder
+            }
 
         notificationManager.notify(1000, builder.build())
+
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createChannel(manager: NotificationManager) {
+        Log.i("Build.VERSION_CODES.O", "이상")
+        var soundChannel = NotificationChannel(
+            NotiService.CHANNEL_ID,
+            "알림공지",
+
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        soundChannel.description = "Sound Channel Description"
+        soundChannel.enableLights(true)
+        soundChannel.lightColor = Color.GREEN
+        soundChannel.enableVibration(true)
+        soundChannel.vibrationPattern = longArrayOf(100, 200, 100, 200)
+
+        val defaultSoundUri: Uri =
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+        val att = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        soundChannel.setSound(defaultSoundUri, att)
+
+        var noneSoundChannel = NotificationChannel(
+            NotiService.NONE_CHANNEL_ID,
+            "비알림공지",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        noneSoundChannel.description = "None Sound Channel Description"
+        noneSoundChannel.enableLights(true)
+        noneSoundChannel.lightColor = Color.GREEN
+        noneSoundChannel.enableVibration(false)
+        noneSoundChannel.setSound(null, null)
+
+        manager.createNotificationChannel(soundChannel)
+        manager.createNotificationChannel(noneSoundChannel)
     }
 }

@@ -19,8 +19,7 @@
 
         <service android:name=".NotiService"
             android:enabled="true"
-            android:exported="true"
-            android:process=":noti"/>
+            android:exported="true"/>
     </application>
 
 </manifest>
