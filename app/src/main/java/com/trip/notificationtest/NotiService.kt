@@ -9,11 +9,11 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
-import android.provider.Settings
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import com.trip.notificationtest.Config.isSound
+import com.trip.notificationtest.Config.notificationID
 
 
 class NotiService : Service() {
@@ -52,13 +52,23 @@ class NotiService : Service() {
         )
         val remoteViews = RemoteViews(packageName, R.layout.notification)
 
+      
+        
         var builder: Notification.Builder =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createChannel(notificationManager)
+                val id = System.currentTimeMillis().toString()
+                createChannel(notificationManager, id)
+                notificationID = id
+
+            /*    val defaultSoundUri: Uri =
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+                val r = RingtoneManager.getRingtone(applicationContext, defaultSoundUri)
+                r.play()*/
 
                 Notification.Builder(
                     applicationContext,
-                    if (isSound) CHANNEL_ID else NONE_CHANNEL_ID
+                    id
                 )
                     .setSmallIcon(R.drawable.ic_launcher_background)
                     .setContentTitle("title")
@@ -66,9 +76,11 @@ class NotiService : Service() {
                     .setAutoCancel(true)
                     .setTicker("Ticker!")
                     .setContentIntent(pendingIntent)
+
+
             } else {
 
-                val builder:Notification.Builder = Notification.Builder(applicationContext)
+                val builder: Notification.Builder = Notification.Builder(applicationContext)
 
                 builder.setSmallIcon(R.drawable.ic_launcher_background)
                     .setContentTitle("title")
@@ -94,7 +106,39 @@ class NotiService : Service() {
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createChannel(manager: NotificationManager) {
+    fun createChannel(manager: NotificationManager, id: String) {
+        Log.i("Build.VERSION_CODES.O", "이상")
+        var alramChannel = NotificationChannel(
+            id,
+            "알림공지",
+
+            if(isSound) NotificationManager.IMPORTANCE_DEFAULT else NotificationManager.IMPORTANCE_LOW
+        )
+        alramChannel.description = "Sound Channel Description"
+        alramChannel.enableLights(true)
+        alramChannel.lightColor = Color.GREEN
+
+        if (isSound) {
+            Log.i("Build.VERSION_CODES.O", "isSound True")
+            alramChannel.enableVibration(true)
+            alramChannel.vibrationPattern = longArrayOf(100, 200, 100, 200)
+
+            val defaultSoundUri: Uri =
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+            val att = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+
+            alramChannel.setSound(defaultSoundUri, att)
+        }
+        manager.createNotificationChannel(alramChannel)
+        Log.i("isSound","new notification id = $id")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createNoneSoundAndSoundChannel(manager: NotificationManager) {
         Log.i("Build.VERSION_CODES.O", "이상")
         var soundChannel = NotificationChannel(
             NotiService.CHANNEL_ID,
