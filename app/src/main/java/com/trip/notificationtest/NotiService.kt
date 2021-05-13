@@ -56,9 +56,7 @@ class NotiService : Service() {
         
         var builder: Notification.Builder =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val id = System.currentTimeMillis().toString()
-                createChannel(notificationManager, id)
-                notificationID = id
+                createChannel(notificationManager, notificationID)
 
             /*    val defaultSoundUri: Uri =
                     RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -68,7 +66,7 @@ class NotiService : Service() {
 
                 Notification.Builder(
                     applicationContext,
-                    id
+                    notificationID
                 )
                     .setSmallIcon(R.drawable.ic_launcher_background)
                     .setContentTitle("title")

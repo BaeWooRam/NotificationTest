@@ -3,5 +3,5 @@ package com.trip.notificationtest
 object Config {
     var isSound = false
 
-    var notificationID:String= ""
+    const val notificationID = "haeroad_service_channel"
 }
