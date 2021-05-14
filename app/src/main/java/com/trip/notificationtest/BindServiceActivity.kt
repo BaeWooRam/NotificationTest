@@ -15,24 +15,28 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 
 /**
- * API별 Foreground Test Activity
+ * BindService
+ * 서비스가 시작되고 Bind를 허용했으면 stopSelf 또는 stopService를 무조건 해줘야한다.
+ * 서비스가 실행되고 클라이언트에서 모두 바인드를 해제해도 서비스를 소멸시키지 않기 때문인다.
+ *
+ * 참고 : https://developer.android.com/guide/components/bound-services?hl=ko
  */
 class BindServiceActivity : AppCompatActivity(R.layout.activity_main), View.OnClickListener {
-    var serviceIntent:Intent? = null
-    var serviceIntent2:Intent? = null
-
+    private val TAG = javaClass.simpleName
     private var mBindService:BindTestService? = null
     private var mBound = false
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            Log.d(TAG, "onService Connected Start!")
+
             val binder = service as BindTestService.LocalBinder
             mBindService = binder.getService()
             mBound = true
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
+            Log.d(TAG, "onService Disconnected Start!")
             mBound = false
         }
     }
@@ -53,8 +57,11 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_main), View.OnCl
 
     override fun onStop() {
         super.onStop()
-        unbindService(connection)
-        mBound = false
+        if (mBound) {
+            Log.d(TAG, "onStop unbindService connection!")
+            unbindService(connection)
+            mBound = false
+        }
     }
 
     override fun onClick(v: View?) {
@@ -73,10 +80,5 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_main), View.OnCl
             }
         }
 
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopService(serviceIntent)
     }
 }
