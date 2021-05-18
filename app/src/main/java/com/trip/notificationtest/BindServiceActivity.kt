@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_bind_service.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -21,7 +22,7 @@ import kotlinx.android.synthetic.main.activity_main.*
  *
  * 참고 : https://developer.android.com/guide/components/bound-services?hl=ko
  */
-class BindServiceActivity : AppCompatActivity(R.layout.activity_main), View.OnClickListener {
+class BindServiceActivity : AppCompatActivity(R.layout.activity_bind_service), View.OnClickListener {
     private val TAG = javaClass.simpleName
     private var mBindService:BindTestService? = null
     private var mBound = false
@@ -43,13 +44,13 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_main), View.OnCl
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        button.setOnClickListener(this)
-        switch1.setOnClickListener(this)
+        countBindServiceButton.setOnClickListener(this)
+        unbindServiceButton.setOnClickListener(this)
+        foregroundServiceButton.setOnClickListener(this)
     }
 
     override fun onStart() {
         super.onStart()
-
 
         Intent(this, BindTestService::class.java).also { intent ->
 //            startService(intent)
@@ -72,18 +73,28 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_main), View.OnCl
 
     override fun onClick(v: View?) {
         when(v?.id){
-            R.id.button -> {
+            R.id.foregroundServiceButton -> {
+                val serviceIntent = Intent(applicationContext, BindTestService::class.java).apply { action = "startForeground"}
+
+                if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent)
+                } else {
+                    startService(serviceIntent)
+                }
+            }
+
+            R.id.countBindServiceButton -> {
                 if(mBound && mBindService != null){
                     mBindService!!.randomNumber?.let {
                         Toast.makeText(this, "number: $it", Toast.LENGTH_SHORT).show()
                     }
+                }else{
+                    Log.d(TAG, "not BindService!")
                 }
             }
 
-            R.id.switch1 -> {
-//                unbindService(connection)
-                Config.isSound = !Config.isSound
-                Log.i("isSound","value = ${Config.isSound}")
+            R.id.unbindServiceButton -> {
+                unbindService(connection)
             }
         }
 
