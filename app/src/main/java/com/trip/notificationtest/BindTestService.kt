@@ -35,15 +35,24 @@ class BindTestService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "Work Service!!")
         return START_NOT_STICKY
     }
 
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "onCreate")
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        Log.d(TAG, "onUnbind")
+//        stopSelf()
+        return super.onUnbind(intent)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d(TAG, "onDestroy")
     }
 
     companion object {

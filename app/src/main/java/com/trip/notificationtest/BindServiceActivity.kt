@@ -50,7 +50,9 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_main), View.OnCl
     override fun onStart() {
         super.onStart()
 
+
         Intent(this, BindTestService::class.java).also { intent ->
+//            startService(intent)
             bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
     }
@@ -59,6 +61,10 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_main), View.OnCl
         super.onStop()
         if (mBound) {
             Log.d(TAG, "onStop unbindService connection!")
+
+            /**
+             * unbindService가 호출되면 onUnbind 메서드가 실행되고 onDestory로 넘어가게 된다. startService를 실행한 상태에서 바인드를 하면 Destory가 되지 않는다(stopSelf or stopService를 해야한다)
+             */
             unbindService(connection)
             mBound = false
         }
@@ -75,6 +81,7 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_main), View.OnCl
             }
 
             R.id.switch1 -> {
+//                unbindService(connection)
                 Config.isSound = !Config.isSound
                 Log.i("isSound","value = ${Config.isSound}")
             }
