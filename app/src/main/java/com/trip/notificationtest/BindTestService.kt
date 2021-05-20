@@ -27,9 +27,14 @@ class BindTestService : Service() {
     private val mGenerator = Random()
     private val isSelfStop = false
 
+    var mBeforeCount = 0
     /** method for clients  */
-    val randomNumber: Int
-        get() = mGenerator.nextInt(100)
+    var randomNumber: Int = 0
+        get(){
+            mBeforeCount = field
+            field = mGenerator.nextInt(100)
+            return field
+        }
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder

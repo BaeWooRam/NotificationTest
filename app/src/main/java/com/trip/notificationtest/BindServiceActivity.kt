@@ -29,7 +29,7 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_bind_service),
     private var mBound = false
 
     //바인딩 서비스 하기전 서비스 시작할 것인지 Flag
-    private var isServiceStart = false
+    private var isServiceStart = true
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
@@ -80,7 +80,7 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_bind_service),
             R.id.countBindServiceButton -> {
                 if (mBound && mBindService != null) {
                     mBindService!!.randomNumber?.let {
-                        Toast.makeText(this, "number: $it", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Count = $it, Before Count = ${mBindService?.mBeforeCount}", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Log.d(TAG, "BindService not exist! execute BindService~~")
