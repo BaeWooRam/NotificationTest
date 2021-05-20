@@ -1,4 +1,3 @@
-
 package com.trip.notificationtest
 
 import android.app.*
@@ -18,20 +17,22 @@ import java.util.*
 
 
 class BindTestService : Service() {
-    inner class LocalBinder :Binder(){
-        fun getService():BindTestService = this@BindTestService
+    inner class LocalBinder : Binder() {
+        fun getService(): BindTestService = this@BindTestService
     }
 
     private val binder = LocalBinder()
+
     // Random number generator
     private val mGenerator = Random()
+    private val isSelfStop = false
 
     /** method for clients  */
     val randomNumber: Int
         get() = mGenerator.nextInt(100)
 
     override fun onBind(intent: Intent?): IBinder? {
-       return binder
+        return binder
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -47,7 +48,8 @@ class BindTestService : Service() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         Log.d(TAG, "onUnbind")
-        stopSelf()
+        if (isSelfStop)
+            stopSelf()
         return super.onUnbind(intent)
     }
 
@@ -92,7 +94,8 @@ class BindTestService : Service() {
 
             } else {
 
-                val builder: NotificationCompat.Builder = NotificationCompat.Builder(applicationContext)
+                val builder: NotificationCompat.Builder =
+                    NotificationCompat.Builder(applicationContext)
 
                 builder.setSmallIcon(R.drawable.ic_launcher_background)
                     .setContentTitle("title")
@@ -111,14 +114,14 @@ class BindTestService : Service() {
             id,
             "포그라운서비스",
 
-            if(isSound) NotificationManager.IMPORTANCE_DEFAULT else NotificationManager.IMPORTANCE_LOW
+            if (isSound) NotificationManager.IMPORTANCE_DEFAULT else NotificationManager.IMPORTANCE_LOW
         )
         channel.description = "Sound Channel Description"
         channel.enableLights(true)
         channel.lightColor = Color.GREEN
 
         manager.createNotificationChannel(channel)
-        Log.i("isSound","new notification id = $id")
+        Log.i("isSound", "new notification id = $id")
     }
 
     companion object {

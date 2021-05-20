@@ -22,10 +22,14 @@ import kotlinx.android.synthetic.main.activity_main.*
  *
  * 참고 : https://developer.android.com/guide/components/bound-services?hl=ko
  */
-class BindServiceActivity : AppCompatActivity(R.layout.activity_bind_service), View.OnClickListener {
+class BindServiceActivity : AppCompatActivity(R.layout.activity_bind_service),
+    View.OnClickListener {
     private val TAG = javaClass.simpleName
-    private var mBindService:BindTestService? = null
+    private var mBindService: BindTestService? = null
     private var mBound = false
+
+    //바인딩 서비스 하기전 서비스 시작할 것인지 Flag
+    private var isServiceStart = false
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
@@ -51,30 +55,20 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_bind_service), V
 
     override fun onStart() {
         super.onStart()
-
-        Intent(this, BindTestService::class.java).also { intent ->
-//            startService(intent)
-            bindService(intent, connection, Context.BIND_AUTO_CREATE)
-        }
+        executeBindService()
     }
 
     override fun onStop() {
         super.onStop()
-        if (mBound) {
-            Log.d(TAG, "onStop unbindService connection!")
-
-            /**
-             * unbindService가 호출되면 onUnbind 메서드가 실행되고 onDestory로 넘어가게 된다. startService를 실행한 상태에서 바인드를 하면 Destory가 되지 않는다(stopSelf or stopService를 해야한다)
-             */
-            unbindService(connection)
-            mBound = false
-        }
+        executeUnBindService()
     }
 
     override fun onClick(v: View?) {
-        when(v?.id){
+        when (v?.id) {
             R.id.foregroundServiceButton -> {
-                val serviceIntent = Intent(applicationContext, BindTestService::class.java).apply { action = "startForeground"}
+                val serviceIntent = Intent(applicationContext, BindTestService::class.java).apply {
+                    action = "startForeground"
+                }
 
                 if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     startForegroundService(serviceIntent)
@@ -84,19 +78,43 @@ class BindServiceActivity : AppCompatActivity(R.layout.activity_bind_service), V
             }
 
             R.id.countBindServiceButton -> {
-                if(mBound && mBindService != null){
+                if (mBound && mBindService != null) {
                     mBindService!!.randomNumber?.let {
                         Toast.makeText(this, "number: $it", Toast.LENGTH_SHORT).show()
                     }
-                }else{
-                    Log.d(TAG, "not BindService!")
+                } else {
+                    Log.d(TAG, "BindService not exist! execute BindService~~")
+                    executeBindService()
                 }
             }
 
             R.id.unbindServiceButton -> {
-                unbindService(connection)
+                executeUnBindService()
             }
         }
+    }
 
+    /**
+     * bindService 및 startService 실행
+     */
+    private fun executeBindService() {
+        Intent(this, BindTestService::class.java).also { intent ->
+            if (isServiceStart)
+                startService(intent)
+
+            bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    /**
+     * unbindService가 호출되면 onUnbind 메서드가 실행되고 onDestory로 넘어가게 된다. startService를 실행한 상태에서 바인드를 하면 Destory가 되지 않는다(stopSelf or stopService를 해야한다)
+     */
+    private fun executeUnBindService() {
+        if (mBound) {
+            Log.d(TAG, "unBindService Start!")
+            unbindService(connection)
+            mBound = false
+        } else
+            Log.d(TAG, "BindService not exist!")
     }
 }
