@@ -5,8 +5,10 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main.*
+import androidx.appcompat.widget.SwitchCompat
+import androidx.core.app.NotificationManagerCompat
 
 
 /**
@@ -18,8 +20,8 @@ class ForegroundServiceActivity : AppCompatActivity(R.layout.activity_main), Vie
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        button.setOnClickListener(this)
-        switch1.setOnClickListener(this)
+        findViewById<Button>(R.id.button).setOnClickListener(this)
+        findViewById<SwitchCompat>(R.id.switch1).setOnClickListener(this)
     }
 
     override fun onClick(v: View?) {
@@ -41,6 +43,10 @@ class ForegroundServiceActivity : AppCompatActivity(R.layout.activity_main), Vie
             R.id.switch1 -> {
                 Config.isSound = !Config.isSound
                 Log.i("isSound","value = ${Config.isSound}")
+
+                val builder = Config.createNotificationBuilder(this)
+                val notification = Config.createCustomNotification(this, builder, intent)
+                NotificationManagerCompat.from(this).notify(Config.NOTI_ID_DEFAULT, notification)
             }
         }
 

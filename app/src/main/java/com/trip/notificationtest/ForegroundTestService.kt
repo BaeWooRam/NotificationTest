@@ -11,6 +11,7 @@ import android.util.Log
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.trip.notificationtest.Config.isSound
 import com.trip.notificationtest.Config.notificationID
 
@@ -31,6 +32,9 @@ class ForegroundTestService : Service() {
 
         if (intent != null && "startForeground" == intent.action) {
             startForegroundService()
+            val builder = Config.createNotificationBuilder(this)
+            val notification = Config.createCustomNotification(this, builder, intent)
+            NotificationManagerCompat.from(this).notify(Config.NOTI_ID_DEFAULT, notification)
         }
 
         return START_NOT_STICKY
