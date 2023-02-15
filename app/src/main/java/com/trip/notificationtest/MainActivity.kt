@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), View.OnClickList
         super.onCreate(savedInstanceState)
         findViewById<Button>(R.id.button).setOnClickListener(this)
         findViewById<SwitchCompat>(R.id.switch1).setOnClickListener(this)
+        Log.d("MainActivity", "onCreate intent = $${intent?.extras}")
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isSuccessful) {
@@ -27,6 +28,25 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), View.OnClickList
 
             Log.d("MainActivity", "Fetching FCM registration token = ${task.result}")
         })
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        if(intent?.extras?.getBoolean("getCallAcceptIntent") != null)
+            Log.d("MainActivity", "onNewIntent getCallAcceptIntent = ${intent?.extras?.getBoolean("getCallAcceptIntent")}")
+        if(intent?.extras?.getBoolean("getCallIntent") != null)
+            Log.d("MainActivity", "onNewIntent getCallIntent = ${intent?.extras?.getBoolean("getCallIntent")}")
+        if(intent?.extras?.getBoolean("getCancelIntent") != null)
+            Log.d("MainActivity", "onNewIntent getCancelIntent = ${intent?.extras?.getBoolean("getCancelIntent")}")
+        super.onNewIntent(intent)
+    }
+
+    override fun startActivityForResult(intent: Intent?, requestCode: Int) {
+        Log.d("MainActivity", "startActivityForResult intent = ${intent?.extras}, requestCode = $requestCode")
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d("MainActivity", "onActivityResult intent = ${intent?.extras}, requestCode = $requestCode")
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onClick(v: View?) {

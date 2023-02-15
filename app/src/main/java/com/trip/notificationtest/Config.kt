@@ -4,6 +4,7 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 import android.widget.RemoteViews
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
@@ -71,10 +72,14 @@ object Config {
         val notificationManagerCompat = NotificationManagerCompat.from(context)
         notificationManagerCompat.cancel(customNotificationId)
 
-        val notificationActivityIntent = Intent(context, MainActivity::class.java)
+        val notificationActivityIntent = Intent(context, MainActivity::class.java).apply {
+            putExtras(Bundle().apply { putBoolean("getCallAcceptIntent", true) })
+            putExtra("getCallAcceptIntent", true)
+        }
+
         val resultPendingIntent = TaskStackBuilder.create(context)
             .addNextIntentWithParentStack(notificationActivityIntent)
-            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
 
         return resultPendingIntent
     }
@@ -84,10 +89,14 @@ object Config {
         val notificationManagerCompat = NotificationManagerCompat.from(context)
         notificationManagerCompat.cancel(customNotificationId)
 
-        val notificationActivityIntent = Intent(context, BindServiceActivity::class.java)
+        val notificationActivityIntent = Intent(context, MainActivity::class.java).apply {
+            putExtras(Bundle().apply { putBoolean("getCallIntent", true) })
+            putExtra("getCallIntent", true)
+        }
+
         val resultPendingIntent = TaskStackBuilder.create(context)
             .addNextIntentWithParentStack(notificationActivityIntent)
-            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            .getPendingIntent(1, PendingIntent.FLAG_UPDATE_CURRENT)
 
         return resultPendingIntent
     }
@@ -97,10 +106,14 @@ object Config {
         val notificationManagerCompat = NotificationManagerCompat.from(context)
         notificationManagerCompat.cancel(customNotificationId)
 
-        val notificationActivityIntent = Intent(context, ForegroundServiceActivity::class.java)
+        val notificationActivityIntent = Intent(context, MainActivity::class.java).apply {
+            putExtras(Bundle().apply { putBoolean("getCancelIntent", true) })
+            putExtra("getCancelIntent", true)
+        }
+
         val resultPendingIntent = TaskStackBuilder.create(context)
             .addNextIntentWithParentStack(notificationActivityIntent)
-            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            .getPendingIntent(2, PendingIntent.FLAG_UPDATE_CURRENT)
 
         return resultPendingIntent
     }
